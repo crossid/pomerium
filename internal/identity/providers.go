@@ -5,6 +5,7 @@ package identity
 import (
 	"context"
 	"fmt"
+	"github.com/pomerium/pomerium/internal/identity/oidc/crossid"
 	"net/url"
 	"sync/atomic"
 
@@ -42,6 +43,8 @@ func NewAuthenticator(o oauth.Options) (a Authenticator, err error) {
 		a, err = auth0.New(ctx, &o)
 	case azure.Name:
 		a, err = azure.New(ctx, &o)
+	case crossid.Name:
+		a, err = crossid.New(ctx, &o)
 	case gitlab.Name:
 		a, err = gitlab.New(ctx, &o)
 	case github.Name:

@@ -8,15 +8,15 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/pomerium/pomerium/internal/directory/ping"
-
 	"github.com/pomerium/pomerium/internal/directory/auth0"
 	"github.com/pomerium/pomerium/internal/directory/azure"
+	"github.com/pomerium/pomerium/internal/directory/crossid"
 	"github.com/pomerium/pomerium/internal/directory/github"
 	"github.com/pomerium/pomerium/internal/directory/gitlab"
 	"github.com/pomerium/pomerium/internal/directory/google"
 	"github.com/pomerium/pomerium/internal/directory/okta"
 	"github.com/pomerium/pomerium/internal/directory/onelogin"
+	"github.com/pomerium/pomerium/internal/directory/ping"
 	"github.com/pomerium/pomerium/internal/log"
 	"github.com/pomerium/pomerium/pkg/grpc/directory"
 )
@@ -88,6 +88,18 @@ func GetProvider(options Options) (provider Provider) {
 			Str("provider", options.Provider).
 			Err(err).
 			Msg("invalid service account for azure directory provider")
+	case crossid.Name:
+		serviceAccount, err := crossid.ParseServiceACcount(options)
+		if err == nil {
+			return crossid.New(
+				auth0.WithTenant(options.ProviderURL),
+				auth0.WithServiceAccount(serviceAccount))
+		}
+		log.Warn(ctx).
+			Str("service", "directory").
+			Str("provider", options.Provider).
+			Err(err).
+			Msg("invalid service account for crossid provider")
 	case github.Name:
 		serviceAccount, err := github.ParseServiceAccount(options.ServiceAccount)
 		if err == nil {
